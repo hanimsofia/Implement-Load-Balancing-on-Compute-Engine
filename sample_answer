@@ -1,0 +1,61 @@
+Task 3. Set up an HTTP load balancer
+ 
+In this task you configure the web servers and ensure the environment is fault tolerant by creating an HTTP load balancer with a managed instance group of 2 nginx web servers.
+ 
+Note: You may need to wait for 5 to 7 minutes to get the score for this task.
+ 
+Create the web server frontend:
+ 
+cat << EOF > startup.sh
+#! /bin/bash
+apt-get update
+apt-get install -y nginx
+service nginx start
+sed -i -- 's/nginx/Google Cloud Platform - '"\$HOSTNAME"'/' /var/www/html/index.nginx-debian.html
+EOF
+ 
+gcloud compute instance-templates create web-server-template \
+        --metadata-from-file startup-script=startup.sh \
+ 
+        --machine-type g1-small \
+        --region <dynamic-region>
+ 
+gcloud compute instance-groups managed create web-server-group \
+        --base-instance-name web-server \
+        --size 2 \
+        --template web-server-template \
+        --region <dynamic-region>
+ 
+gcloud compute firewall-rules create <dynamic-firewall-rule> \
+        --allow tcp:80 \
+        --network default
+ 
+gcloud compute http-health-checks create http-basic-check
+ 
+gcloud compute instance-groups managed \
+        set-named-ports web-server-group \
+        --named-ports http:80 \
+        --region <dynamic-region>
+ 
+gcloud compute backend-services create web-server-backend \
+        --protocol HTTP \
+        --http-health-checks http-basic-check \
+        --global
+ 
+gcloud compute backend-services add-backend web-server-backend \
+        --instance-group web-server-group \
+        --instance-group-region <dynamic-region> \
+        --global
+ 
+gcloud compute url-maps create web-server-map \
+        --default-service web-server-backend
+ 
+gcloud compute target-http-proxies create http-lb-proxy \
+        --url-map web-server-map
+ 
+gcloud compute forwarding-rules create http-content-rule \
+      --global \
+      --target-http-proxy http-lb-proxy \
+      --ports 80
+ 
+gcloud compute forwarding-rules list
