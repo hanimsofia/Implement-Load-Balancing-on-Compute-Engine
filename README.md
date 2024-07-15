@@ -1,4 +1,4 @@
-# Implement Load Balancing on Compute Engine: Challenge Lab
+# Implement Load Balancing on Compute Engine
 
 ## Challenge scenario
 You have started a new role as a Junior Cloud Engineer for Jooli, Inc. You are expected to help manage the infrastructure at Jooli. Common tasks include provisioning resources for projects.
@@ -149,4 +149,4 @@ gcloud compute forwarding-rules list
 
 
 ## Sample Answer
-Checkout the collapsed section for each task!! :star:
+Checkout the collapsed section for each task!! :stuck_out_tongue:
